@@ -25,13 +25,14 @@ object WeatherGenerator {
       .appName("WeatherGenerator")
       .getOrCreate()
     val inputPath =
-      s"file:///data/somefile.txt"
+      s"/data/somefile.txt"
     val outputPath =
-      s"file:///data/output.txt"
+      s"file:///data/output"
     log.info(s"Output path set to ${outputPath}")
 
     val sc = spark.sparkContext
-    val textFile = sc.parallelize(Source.fromFile("/data/somefile.txt").getLines.toList)
+    val textFile = sc.parallelize(Source.fromFile(inputPath).getLines.toList)
+    // use with S3 or hdfs as source
     //val textFile = sc.textFile(inputPath)
     val counts = textFile.flatMap(line => line.split(" "))
       .map(word => (word, 1))
