@@ -3,7 +3,7 @@
 docker run \
   -ti \
   --rm \
-  -v /data:./data \
+  -v $PWD/data:/data \
   -p 5000-5010:5000-5010 \
   -e SCM_URL="https://github.com/arihantsurana/weather.git" \
   -e SCM_BRANCH="setup-weather-java" \

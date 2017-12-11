@@ -3,6 +3,8 @@ package com.arihantsurana.weather
 import org.apache.log4j.LogManager
 import org.apache.spark.sql.SparkSession
 
+import scala.io.Source
+
 /**
   * Created by arihant.surana on 11/12/17.
   */
@@ -29,7 +31,8 @@ object WeatherGenerator {
     log.info(s"Output path set to ${outputPath}")
 
     val sc = spark.sparkContext
-    val textFile = sc.textFile(inputPath)
+    val textFile = sc.parallelize(Source.fromFile("/data/somefile.txt").getLines.toList)
+    //val textFile = sc.textFile(inputPath)
     val counts = textFile.flatMap(line => line.split(" "))
       .map(word => (word, 1))
       .reduceByKey(_ + _)
