@@ -23,9 +23,9 @@ object WeatherGenerator {
       .appName("WeatherGenerator")
       .getOrCreate()
     val inputPath =
-      s"./data/somefile.txt"
+      s"file:///data/somefile.txt"
     val outputPath =
-      s"./data/output.txt"
+      s"file:///data/output.txt"
     log.info(s"Output path set to ${outputPath}")
 
     val sc = spark.sparkContext
