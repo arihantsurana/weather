@@ -3,8 +3,6 @@ package com.arihantsurana.weather
 import org.apache.log4j.LogManager
 import org.apache.spark.sql.SparkSession
 
-import scala.io.Source
-
 /**
   * Created by arihant.surana on 11/12/17.
   */
@@ -24,20 +22,31 @@ object WeatherGenerator {
       .builder()
       .appName("WeatherGenerator")
       .getOrCreate()
-    val inputPath =
-      s"/data/somefile.txt"
-    val outputPath =
-      s"file:///data/output"
+    val outputPath = s"file:///data/output"
     log.info(s"Output path set to ${outputPath}")
 
     val sc = spark.sparkContext
-    val textFile = sc.parallelize(Source.fromFile(inputPath).getLines.toList)
-    // use with S3 or hdfs as source
-    //val textFile = sc.textFile(inputPath)
-    val counts = textFile.flatMap(line => line.split(" "))
-      .map(word => (word, 1))
-      .reduceByKey(_ + _)
-    counts.saveAsTextFile(outputPath)
+    val iataCitiesRdd = sc.parallelize(IataSource.readIataDataFromFile())
+    // read the iata codes and locations into a data frame
+    import spark.implicits._
+    val iataCitiesDf = iataCitiesRdd.toDF(
+      "Airport ID",
+      "Name",
+      "City",
+      "Country",
+      "IATA",
+      "ICAO",
+      "Latitude",
+      "Longitude",
+      "Altitude",
+      "Timezone",
+      "DST",
+      "Tz",
+      "Type",
+      "Source")
+    val filteredDf = iataCitiesDf.select($"IATA", $"Latitude" + "," + $"Longitude" + "," +$"Altitude" )
+    filteredDf.show()
+    filteredDf.write.option("sep","|").option("header","true").csv(outputPath)
     spark.stop()
   }
 }
