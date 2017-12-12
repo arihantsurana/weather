@@ -1,7 +1,7 @@
 package com.arihantsurana.weather
 
 import org.apache.log4j.LogManager
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{Row, SparkSession}
 
 /**
   * Created by arihant.surana on 11/12/17.
@@ -26,27 +26,23 @@ object WeatherGenerator {
     log.info(s"Output path set to ${outputPath}")
 
     val sc = spark.sparkContext
-    val iataCitiesRdd = sc.parallelize(IataSource.readIataDataFromFile())
+    val iataCitiesRdd = sc.parallelize(IataSource.readIataDataFromFile)
+    val localTimeRdd = sc.parallelize(TimeSource.getTimeSeries)
     // read the iata codes and locations into a data frame
     import spark.implicits._
-    val iataCitiesDf = iataCitiesRdd.toDF(
-      "Airport ID",
-      "Name",
-      "City",
-      "Country",
-      "IATA",
-      "ICAO",
-      "Latitude",
-      "Longitude",
-      "Altitude",
-      "Timezone",
-      "DST",
-      "Tz",
-      "Type",
-      "Source")
-    val filteredDf = iataCitiesDf.select($"IATA", $"Latitude" + "," + $"Longitude" + "," +$"Altitude" )
-    filteredDf.show()
-    filteredDf.write.option("sep","|").option("header","true").csv(outputPath)
+    val iataCitiesDf = iataCitiesRdd.map(line => line.split(",")).toDF(
+      "Airport ID", "Name", "City", "Country", "IATA", "ICAO", "Latitude", "Longitude", "Altitude", "Timezone", "DST", "Tz", "Type", "Source")
+    iataCitiesDf.createOrReplaceTempView("stations")
+    localTimeRdd.toDF("Localtime").createOrReplaceTempView("timeseries")
+    // cross join cities with time series
+    val joinedDf = spark.sql("SELECT IATA, CONCAT(Latitude , ', ' , Longitude , ', ' , Altitude) as Location, Localtime FROM stations JOIN timeseries ON 1=1 ")
+    joinedDf.show()
+    val resultDF = joinedDf.map(row => {
+      val generatedWeather = RandomWeather.generate()
+      Row(row.get(0), row.get(1), row.get(2), generatedWeather._1, generatedWeather._2, generatedWeather._3, generatedWeather._4)
+    }).toDF("IATA", "Loacation", "Localtime", "Condition", "Temprature", "Pressure", "Humidity")
+    resultDF.show()
+    resultDF.write.option("sep", "|").option("header", "true").csv(outputPath)
     spark.stop()
   }
 }

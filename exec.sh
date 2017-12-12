@@ -19,4 +19,4 @@ docker run \
   -e APP_ARGS="" \
   tashoyan/docker-spark-submit:spark-2.2.0
 
-docker rm weather-spark -f
+# docker rm weather-spark -f
