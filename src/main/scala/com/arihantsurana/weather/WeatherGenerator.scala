@@ -8,12 +8,6 @@ import scala.util.Random
 /**
   * Created by arihant.surana on 11/12/17.
   */
-
-/**
-  * Created by arihant.surana on 15/09/2016.
-  *
-  * primary Streaming object to handle Jirafe events and an entrypoint to Spark Streaming job
-  */
 object WeatherGenerator {
 
   def main(args: Array[String]) {
@@ -26,7 +20,7 @@ object WeatherGenerator {
       .getOrCreate()
     val outputPath = s"file:///data/output"
     log.info(s"Output path set to ${outputPath}")
-val random = new Random(999494958679785L)
+    val random = new Random(999494958679785L)
     val sc = spark.sparkContext
     val iataCitiesRdd = sc.parallelize(IataSource.readIataDataFromFile).repartition(8)
     val localTimeRdd = sc.parallelize(TimeSource.getTimeSeries(100))
@@ -42,7 +36,7 @@ val random = new Random(999494958679785L)
       .map(row => List(row._1(0), row._1(1) + ", " + row._1(2) + ", " + row._1(3), row._2))
       // Add randomized weather data to the row
       .map(row => {
-      val generatedWeather = RandomWeather.generate()
+      val generatedWeather = RandomWeather.generate(random)
       row ++ List(generatedWeather._1, generatedWeather._2, generatedWeather._3, generatedWeather._4)
     })
       // Prepare csv formatted strings
