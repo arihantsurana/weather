@@ -26,7 +26,7 @@ object WeatherGenerator {
     log.info(s"Output path set to ${outputPath}")
 
     val sc = spark.sparkContext
-    val iataCitiesRdd = sc.parallelize(IataSource.readIataDataFromFile)
+    val iataCitiesRdd = sc.parallelize(IataSource.readIataDataFromFile).repartition(8)
     val localTimeRdd = sc.parallelize(TimeSource.getTimeSeries)
     // read the iata codes and locations into a data frame
     val stationsRdd = iataCitiesRdd
@@ -53,7 +53,6 @@ object WeatherGenerator {
 
     // Write the output data to files
     resultsRdd.saveAsTextFile(outputPath)
-
 
     // stop spark context and thats that!
     spark.stop()
