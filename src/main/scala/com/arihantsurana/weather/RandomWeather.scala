@@ -1,5 +1,7 @@
 package com.arihantsurana.weather
 
+import scala.util.Random
+
 /**
   * Created by arihant.surana on 12/12/17.
   */
@@ -31,12 +33,12 @@ object RandomWeather {
       "blizzard",
       "avalanche",
       "Mist")
-  def generate():(String, String, String, String)={
-    var condition = weatherTypes(0)
-    var temprature = ""
-    var pressure =""
-    var humidity = ""
-    (condition, temprature, pressure, humidity)
+  def generate(random: Random):(String, String, String, String)={
+    var condition = weatherTypes(random.nextInt(weatherTypes.size))
+    var temprature = random.nextDouble()
+    var pressure =random.nextDouble()
+    var humidity = random.nextDouble()
+    (condition, temprature.toString, pressure.toString, humidity.toString)
   }
 
 }
