@@ -1,7 +1,7 @@
 package com.arihantsurana.weather
 
 import org.apache.log4j.LogManager
-import org.apache.spark.sql.{Row, SparkSession}
+import org.apache.spark.sql.SparkSession
 
 /**
   * Created by arihant.surana on 11/12/17.
@@ -29,20 +29,37 @@ object WeatherGenerator {
     val iataCitiesRdd = sc.parallelize(IataSource.readIataDataFromFile)
     val localTimeRdd = sc.parallelize(TimeSource.getTimeSeries)
     // read the iata codes and locations into a data frame
-    import spark.implicits._
-    val iataCitiesDf = iataCitiesRdd.map(line => line.split(",")).toDF(
-      "Airport ID", "Name", "City", "Country", "IATA", "ICAO", "Latitude", "Longitude", "Altitude", "Timezone", "DST", "Tz", "Type", "Source")
-    iataCitiesDf.createOrReplaceTempView("stations")
-    localTimeRdd.toDF("Localtime").createOrReplaceTempView("timeseries")
+    val stationsRdd = iataCitiesRdd
+      // Split Lines into individual cells of the csv input
+      .map(line => line.split(","))
+      // Extract the required columns, i.e. IATA code
+      .map(row => List(row(4), row(6), row(7), row(8)))
+
     // cross join cities with time series
-    val joinedDf = spark.sql("SELECT IATA, CONCAT(Latitude , ', ' , Longitude , ', ' , Altitude) as Location, Localtime FROM stations JOIN timeseries ON 1=1 ")
-    joinedDf.show()
-    val resultDF = joinedDf.map(row => {
+    val resultsRdd = stationsRdd.cartesian(localTimeRdd)
+      // Flatten rdd to a single row and combine latitude, longitude and altitude as single locatiopn column
+      .map(row => List(row._1(0), row._1(1) + ", " + row._1(2) + ", " + row._1(3), row._2))
+      // Add randomized weather data to the row
+      .map(row => {
       val generatedWeather = RandomWeather.generate()
-      Row(row.get(0), row.get(1), row.get(2), generatedWeather._1, generatedWeather._2, generatedWeather._3, generatedWeather._4)
-    }).toDF("IATA", "Loacation", "Localtime", "Condition", "Temprature", "Pressure", "Humidity")
-    resultDF.show()
-    resultDF.write.option("sep", "|").option("header", "true").csv(outputPath)
+      row ++ List(generatedWeather._1, generatedWeather._2, generatedWeather._3, generatedWeather._4)
+    })
+      // Prepare csv formatted strings
+      .map(row => prepCsv(row, "|"))
+
+    println("resultsRdd.top(10)" + resultsRdd.top(10))
+
+    println("resultsRdd.count()" + resultsRdd.count())
+
+    // Write the output data to files
+    resultsRdd.saveAsTextFile(outputPath)
+
+
+    // stop spark context and thats that!
     spark.stop()
+  }
+
+  def prepCsv(row: List[String], delimiter: String): String = {
+    row.mkString(delimiter)
   }
 }
