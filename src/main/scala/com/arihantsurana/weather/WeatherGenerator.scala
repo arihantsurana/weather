@@ -39,7 +39,7 @@ object WeatherGenerator {
       // group by the iata city codes so we can gather all data for a city in a single iterator
       .groupBy(row => row(0))
       // perform random weather generation for each city
-      .flatMap(kv => RandomWeather.generateForTimeseries(kv._2, random, 10.5))
+      .flatMap(kv => RandomWeather.generateForTimeseries(kv._2))
       // Prepare csv formatted strings
       .map(row => prepCsv(row, "|"))
       // Write the output data to files
