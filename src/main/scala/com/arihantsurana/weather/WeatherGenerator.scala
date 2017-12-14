@@ -2,7 +2,7 @@ package com.arihantsurana.weather
 
 import org.apache.log4j.LogManager
 import org.apache.spark.sql.SparkSession
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, Instant}
 
 import scala.util.Random
 
@@ -14,7 +14,7 @@ object WeatherGenerator {
   def main(args: Array[String]) {
     val log = LogManager.getRootLogger
     args.foreach(s => log.info(s"Argument - ${s}"))
-
+    val startTime = new Instant().getMillis
     val spark = SparkSession
       .builder()
       .appName("WeatherGenerator")
@@ -47,6 +47,8 @@ object WeatherGenerator {
 
     // stop spark context and thats that!
     spark.stop()
+    val endTime = new Instant().getMillis
+    log.info(s"Total execution time ${endTime - startTime} ms")
   }
 
   def prepCsv(row: List[String], delimiter: String): String = {
