@@ -52,28 +52,33 @@ object RandomWeather {
     (condition, temprature.toString, pressure.toString, humidity.toString)
   }
 
-  def generateForTimeseries(inputRows: Iterable[List[String]]): Iterable[List[String]] = {
+  def generateForTimeseries(inputRows: List[List[String]], initialConditionMatrix: List[List[Double]]): Iterable[List[String]] = {
     // for each
     val outputRows = new ListBuffer[List[String]]
     val random = new Random
     //TODO: setup initial conditions as some meanigful value from an initial condition based on altitude
     var conditionIndex = random.nextInt(weatherTypes.size)
-    var temprature = random.nextDouble()
-    var pressure = random.nextDouble()
-    var humidity = random.nextDouble()
+    // altitude from the input data
+    val altitude = inputRows(0)(3).toDouble
+    val initialConditionRow = initialConditionMatrix.filter(row => (row(0) <= altitude && row(1) > altitude))(0)
+    var temprature = initialConditionRow(2)
+    var pressure = (initialConditionRow(4)) * (10 ^ 4)
+    var humidity = random.nextInt(humidityMax).toDouble - humidityMin
     // sort the list of values on date
     val sortedRows = inputRows.toSeq.sortBy(row => row(4))
     sortedRows.foreach(row => {
-      // altitude in meters
-      val altitude = row(3)
+      // altitude in meters can be used in future where a learned model is used to predit the next values
+      // val altitude = row(3)
+
       // Calculate temprature as a gradual random variation from last value
       temprature = generateNextDouble(temprature, tempratureMin, tempratureMax, tempratureVariance, random)
-      //TODO: convert this random generator to a function of temprature and altitude
+
+      //TODO: convert following random generators to a function of temprature and altitude to extrapolate from correlated
+      // data points. Ideally a Learned model / Predictor using leniar regression can pe plugged in here
       pressure = generateNextDouble(pressure, pressureMin, pressureMax, pressureVariance, random)
-      //TODO: convert this random generator to a function of temprature and altitude
       humidity = generateNextDouble(humidity, humidityMin, humidityMax, humidityVariance, random)
-      //TODO: Convert randomly generated value to a function of other 3 variables
-      conditionIndex = generateNextInt(conditionIndex, 0, weatherTypes.size, 3, random)
+      conditionIndex = generateNextInt(conditionIndex, 0, weatherTypes.size - 1, 3, random)
+
       // append the generated weather data to existing row
       outputRows.append(row ++ List(weatherTypes(conditionIndex), temprature.toString, pressure.toString, humidity.toString))
     })

@@ -24,7 +24,7 @@ object WeatherGenerator {
     val random = new Random(999494958679785L)
     val sc = spark.sparkContext
     val iataCitiesRdd =
-      sc.parallelize(IataSource.readIataDataFromFile, 8)
+      sc.parallelize(csvSources.readIataDataFromFile, 8)
     val localTimeRdd = sc.parallelize(TimeSource.getTimeSeries(DateTime.now.getMillis, 100))
     // read the iata codes and locations into a data frame
     iataCitiesRdd
@@ -39,7 +39,7 @@ object WeatherGenerator {
       // group by the iata city codes so we can gather all data for a city in a single iterator
       .groupBy(row => row(0))
       // perform random weather generation for each city
-      .flatMap(kv => RandomWeather.generateForTimeseries(kv._2))
+      .flatMap(kv => RandomWeather.generateForTimeseries(kv._2.toList, csvSources.readAvgValuesFromFile))
       // Prepare csv formatted strings
       .map(row => prepCsv(row, "|"))
       // Write the output data to files
