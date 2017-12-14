@@ -2,6 +2,7 @@ package com.arihantsurana.weather
 
 import org.apache.log4j.LogManager
 import org.apache.spark.sql.SparkSession
+import org.joda.time.DateTime
 
 import scala.util.Random
 
@@ -23,8 +24,8 @@ object WeatherGenerator {
     val random = new Random(999494958679785L)
     val sc = spark.sparkContext
     val iataCitiesRdd =
-      sc.parallelize(IataSource.readIataDataFromFile).repartition(8)
-    val localTimeRdd = sc.parallelize(TimeSource.getTimeSeries(100))
+      sc.parallelize(IataSource.readIataDataFromFile, 8)
+    val localTimeRdd = sc.parallelize(TimeSource.getTimeSeries(DateTime.now.getMillis, 100))
     // read the iata codes and locations into a data frame
     iataCitiesRdd
       // Split Lines into individual cells of the csv input

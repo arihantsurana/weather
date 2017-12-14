@@ -46,7 +46,7 @@ object RandomWeather {
   def generateForTimeseries(inputRows: Iterable[List[String]], random: Random, variance: Double): Iterable[List[String]] = {
     // for each
     val outputRows = new ListBuffer[List[String]]
-    //TODO: setup initial conditions as some meanigful value
+    //TODO: setup initial conditions as some meanigful value from an initial condition based on altitude
     var conditionIndex = random.nextInt(weatherTypes.size)
     var temprature = random.nextDouble()
     var pressure = random.nextDouble()
