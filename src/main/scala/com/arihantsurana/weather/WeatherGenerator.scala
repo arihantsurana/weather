@@ -14,18 +14,19 @@ object WeatherGenerator {
   def main(args: Array[String]) {
     val log = LogManager.getRootLogger
     args.foreach(s => log.info(s"Argument - ${s}"))
+    val timeSeriesSize = args(0).toInt
+    val outputPath = s"file:///data/output/${args(1)}"
     val startTime = new Instant().getMillis
     val spark = SparkSession
       .builder()
       .appName("WeatherGenerator")
       .getOrCreate()
-    val outputPath = s"file:///data/output"
     log.info(s"Output path set to ${outputPath}")
     val random = new Random(999494958679785L)
     val sc = spark.sparkContext
     val iataCitiesRdd =
-      sc.parallelize(csvSources.readIataDataFromFile, 8)
-    val localTimeRdd = sc.parallelize(TimeSource.getTimeSeries(DateTime.now.getMillis, 100))
+      sc.parallelize(csvSources.readIataDatafromWeb())
+    val localTimeRdd = sc.parallelize(TimeSource.getTimeSeries(DateTime.now.getMillis, timeSeriesSize))
     // read the iata codes and locations into a data frame
     iataCitiesRdd
       // Split Lines into individual cells of the csv input

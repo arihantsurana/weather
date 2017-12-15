@@ -16,7 +16,7 @@ docker run \
   -e SCM_URL="https://github.com/arihantsurana/weather.git" \
   -e SPARK_DRIVER_HOST="${LOCAL_IP}" \
   -e MAIN_CLASS="com.arihantsurana.weather.WeatherGenerator" \
-  -e APP_ARGS="" \
+  -e APP_ARGS="10000 result.files" \
   tashoyan/docker-spark-submit:spark-2.2.0
 
 # docker rm weather-spark -f
