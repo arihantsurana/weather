@@ -23,14 +23,25 @@ Use the two command line args and submit the spark jar using
 ### On your local spark installation
 Pretty much the same as above, use the jar and submit it as you would any other spark app.
 
-### Least effort, no installation
-You can use a transient docker based spark run time env using the docker image, which sets up an sbt env and downloads and compiles the jar on the container and executes the project resulting in the data being shared using the `./data/` available to the container as `/data/`
+### On Docker container - Least effort
+You can use a transient docker based spark env to execute this project. The docker image outlined below, sets up an sbt env, downloads the github project, compiles and executes the project inside the container resulting in the data being shared using the `./data/` available to the container as `/data/`
 
-to be able to avail this method you need to review and execute `./exec.sh`
+How?
+Just review and execute `./exec.sh`
 
-NOTE - for non linux runtime env, eg. mac you will need to setup the local ip of the machine in exec.sh script before you execute it.
+NOTE -
+For non linux runtime env, eg. mac you will need to setup the local ip of the machine in exec.sh script before you execute it.
 
 You can also setup/tweak your input arguments in the script.
+
+Since the container downloads,  and compiles the project, it takes significant amount of time to just setup sbt and setup all dependencies.
+The actual execution times will be much less than the setup time. You can see the exec time calculated at the end of execution logs like so:
+```
+...
+17/12/16 02:39:15 INFO OutputCommitCoordinator$OutputCommitCoordinatorEndpoint: OutputCommitCoordinator stopped!
+17/12/16 02:39:15 INFO SparkContext: Successfully stopped SparkContext
+17/12/16 02:39:15 INFO root: Total execution time 25425 ms
+```
 
 
 ## Input
