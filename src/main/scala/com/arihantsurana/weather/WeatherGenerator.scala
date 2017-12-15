@@ -40,6 +40,8 @@ object WeatherGenerator {
       .groupBy(row => row(0))
       // perform random weather generation for each city
       .flatMap(kv => RandomWeather.generateForTimeseries(kv._2.toList, csvSources.readAvgValuesFromFile))
+      // Convert lat long and alt to a single column
+      .map(row => List(row(0), row(1) + ", " + row(2) + ", " + row(3)) ++ row.drop(4))
       // Prepare csv formatted strings
       .map(row => prepCsv(row, "|"))
       // Write the output data to files
@@ -54,7 +56,7 @@ object WeatherGenerator {
   def prepCsv(row: List[String], delimiter: String): String = {
     row
       // cleanup by stripping any quotes from each cell
-      .map(cell => cell.stripPrefix(",").stripSuffix(",").trim)
+      .map(cell => cell.stripPrefix("\"").stripSuffix("\"").trim)
       // combine all cells to form a row
       .mkString(delimiter)
   }
