@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
 # Setup local ip
+# for linux keep using localhost
+export $LOCAL_IP=localhost
 # for mac use
-# ipconfig getifaddr en0
-# to get the local ip
-# for linux keep local host
-# export $LOCAL_IP=localhost
-export LOCAL_IP=172.25.8.30
+# `ipconfig getifaddr en0`
+# to get the local ip and set it up in the variable like:
+# export LOCAL_IP=172.25.8.30
+
 #Spark submit
+# this will setup the docker container, download sbt the source,
+# build it and then execute it for you
 docker run \
   --name weather-spark \
   -ti \
@@ -16,7 +19,6 @@ docker run \
   -e SCM_URL="https://github.com/arihantsurana/weather.git" \
   -e SPARK_DRIVER_HOST="${LOCAL_IP}" \
   -e MAIN_CLASS="com.arihantsurana.weather.WeatherGenerator" \
-  -e APP_ARGS="10000 result.files" \
+  -e APP_ARGS="100 result.files" \
   tashoyan/docker-spark-submit:spark-2.2.0
 
-# docker rm weather-spark -f

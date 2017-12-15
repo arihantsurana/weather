@@ -10,6 +10,7 @@ object csvSources {
   val inputPathAvgValues = s"/data/average_conditions.csv"
   val inputUrlIataGeography = "https://raw.githubusercontent.com/jpatokal/openflights/master/data/airports.dat"
 
+  // for backup purposes where spark may not have access to internet.
   def readIataDataFromFile(): List[String] = {
     Source.fromFile(inputPathIataGeography).getLines.toList
   }
