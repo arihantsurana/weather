@@ -46,8 +46,8 @@ object WeatherGenerator {
       .groupBy(row => row(0))
       // perform random weather generation for each station
       .flatMap(kv => RandomWeather.generateForTimeseries(kv._2.toList, csvSources.readAvgValuesFromFile))
-      // Convert lat, long and alt to a single column
-      .map(row => List(row(0), row(1) + ", " + row(2) + ", " + row(3)) ++ row.drop(4))
+      // Merge lat, long and alt to a single column
+      .map(row => List(row(0), row.slice(1, 4).mkString(",")) ++ row.drop(4))
       // Prepare csv formatted strings
       .map(row => prepCsv(row, "|"))
       // Write the output data to files
