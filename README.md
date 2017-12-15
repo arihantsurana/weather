@@ -47,12 +47,13 @@ Csv data in the format:
 
 is supplied in multiple files in the directory specified in the input
 
-## About the Weather generator
-The current operation generates data for all IATA stations from a list of all airports in the world and generated plausible weather data by use of random variation in the weather attributes like temprature pressure etc.
+## About Weather Generator
+The weather generator application is currently a starting point / framework which generates data using a list of all airport stations in the world, initializews their state as a generic average weather condition, and uses randomized slight variations to the previous days values to calculate next days values per station.
 
-Each station is initialized with avg weather values for a given time series and then next dayus weather is extrapolated with a fixed variation from last day's weather.
+Currently the generation logic is agnostic to the effect of variables on each other, eg. the value of temprature and altitude combination does not necessarily dictate the pressure value for a given day.
 
-Currently the generation logic is entirely dependent on randomized extrapolation values from previous value, independent of the effect of attributes on each other. eg. the value of temprature and altitude combination does not affect the pressure value being calculated.
- Eventually, to evolve this system into more realistic prediction engine, we can easily plug in "learned" models to predict a day's weather data from previous cvalues at the given station.
+ Eventually, to evolve this system into more realistic prediction engine, "learned" models can be easily plugged in to predict/extrapolate a day's weather data from previous values at the given station.
+
+ Another possible evolution can be the use of lat - long geographies to correlate and affect weather data between stations.
 
 
