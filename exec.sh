@@ -1,11 +1,9 @@
 #!/usr/bin/env bash
 # Setup local ip
 # for linux keep using localhost
-export $LOCAL_IP=localhost
-# for mac use
-# `ipconfig getifaddr en0`
-# to get the local ip and set it up in the variable like:
-# export LOCAL_IP=172.25.8.30
+# export $LOCAL_IP=localhost
+# for mac use the local ip of the machine
+export LOCAL_IP=$(ipconfig getifaddr en0)
 
 #Spark submit
 # this will setup the docker container, download sbt the source,
